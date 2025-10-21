@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/16 22:51:13 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/21 17:53:42 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,9 +222,6 @@ void	handle_redir_token(char **str, t_token_node **head)
 	}	
 	append_token(head, tokens[state].value, tokens[state].type);
 }
-
-
-
 void	handle_quote_state(char c, t_token_states *state)
 {
 	if (c == '"' )
@@ -413,60 +410,42 @@ void	purge_quotes(t_token_node **token_head)
 	}
 }
 
-void	freetklst(t_token_node **token_head)
-{
-	t_token_node *tmp;
-	t_token_node *tmp2;
-
-	tmp = *token_head;
-	while (tmp)
-	{
-		if (tmp->value)
-		{
-			free(tmp->value);
-		}
-		tmp2 = tmp;
-		tmp = tmp->next;
-		free(tmp2);
-		tmp2 = NULL;
-	}
-	*token_head = NULL;
-}
-
 int main(int argc, char *argv[], char **envp)
 {
 	char *prompt = "minishell$ ";
 	char 			*line;
 	t_token_node	*token_head = NULL;
-
+	t_data 			*data = calloc(1, sizeof(t_data));
 	
 
 	if (argc > 1 && argv[1])
 		return (1);
-	
+	init_data(data, envp);
 	while (1)
 	{	
-		line = readline(prompt);	
-		if (!line || strcmp(line, "exit") == 0)
+		data->line = readline(data->prompt);	
+		if (!data->line || strcmp(data->line, "exit") == 0)
 			break;
 	
-		ft_tokenizer(line, &token_head);
-		expand_tokens(&token_head);
-		purge_quotes(&token_head);
-		t_token_node *tmp = token_head;
+		ft_tokenizer(data->line, &data->token_head);
+		expand_tokens(&data->token_head);
+		purge_quotes(&data->token_head);
+		t_token_node *tmp = data->token_head;
 		while (tmp)
 		{
 			printf("%s\n", tmp->value);
 			tmp = tmp->next;
 		}
-		freetklst(&token_head);
-		// for (t_token_node *tmp = token_head; tmp;)
+		free_tklst(&data->token_head);
+		// for (t_token_node *tmp = data->token_head; tmp;)
 		// {
 		// 	free(tmp->value);
 		// 	t_token_node *tmp2 = tmp;
 		// 	tmp = tmp->next;
 		// 	free(tmp2);
 		// }
-		free(line);
+		free(data->line);
 	}
+	clean_all(data);
+	return (0);
 }

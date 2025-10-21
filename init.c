@@ -1,0 +1,65 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   init.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/10/21 13:11:27 by clouden           #+#    #+#             */
+/*   Updated: 2025/10/21 17:47:16 by clouden          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <minishell.h>
+
+void	append_env(t_env_node **env_head, char *name, char *value)
+{
+	t_env_node *new_node;
+	t_env_node *temp;
+
+	new_node = calloc(1, sizeof(t_env_node));
+	new_node->name = strdup(name);
+	new_node->value = strdup(value);
+	if (!*env_head)
+	{
+		*env_head = new_node;
+	}			
+	else
+	{
+	
+		temp = *env_head;
+		while(temp->next)
+		{
+			temp = temp->next;
+		}
+		temp->next = new_node;
+	}
+}
+
+void	copy_envp(t_env_node **env_node, char **envp)
+{
+	char *tmpname;
+	char *tmpval;
+
+	if (!envp)
+		return ;
+	while (*envp)
+	{
+		tmpname = strtok(*envp, "=");
+		tmpval = strtok(NULL, " ");
+		append_env(env_node, tmpname, tmpval);
+		envp++;		
+	}
+	return ;
+}
+
+void	init_data(t_data *data, char **envp)
+{
+	data->line = NULL;
+	data->prompt = "minishell $";
+	data->token_head = NULL;
+	data->env_head = NULL;	
+	copy_envp(&data->env_head, envp);
+	
+}
+
