@@ -6,17 +6,11 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/21 17:53:42 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/22 18:18:46 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <stdlib.h>
 #include <minishell.h>
-
-#include <stddef.h>
 
 int ft_strlen(char *s)
 {
@@ -138,24 +132,6 @@ char	*ft_itoa(int n)
 	return (str);
 }
 
-
-
-
-
-int ft_isexpnsion(char c)
-{
-	return (c == '$');
-}
-
-int ft_isdoubleqt(char c)
-{
-	return (c == '"');	
-}
-
-int ft_issingleqt(char c)
-{
-	return (c == '\'');
-}
 	
 int	ft_isshelloperator(char c)
 {
@@ -292,10 +268,11 @@ void ft_tokenizer(char *str, t_token_node **token_head)
 	}
 }
 
-void expand_dollar(t_token_node *token_node, char **expander, char *buffer, int *i)
+void expand_dollar(t_token_node *token_node, char **expander, char *buffer, \
+			int *i, t_data *data)
 {
 	int	exit_code = 130;
-	t_env_node env = {"NAME", "VALUE", NULL};
+	t_env_node *env; 
 	char *number;
 
 	(*expander)++;
@@ -308,10 +285,12 @@ void expand_dollar(t_token_node *token_node, char **expander, char *buffer, int 
 	}
 	else if (isalpha(**expander) || **expander == '_' )
 	{
-		if (strncmp(*expander, env.name, ft_strlen(env.name)) == 0)
-			ft_strlcat(buffer, env.value, 1024);
+		env = get_env_node(data->env_head, *expander);
+		if (env)
+			ft_strlcat(buffer, env->value, 1024);
 		while (isalnum(**expander) || **expander == '_')
 			(*expander)++;
+	
 	}
 	else if (isdigit(**expander))
 	{
@@ -327,7 +306,7 @@ void expand_dollar(t_token_node *token_node, char **expander, char *buffer, int 
 
 }
 
-void expand_single_token(t_token_node *token_node)
+void expand_single_token(t_token_node *token_node, t_data *data)
 {
 	t_token_states state = NORMAL;
 	char *expander = token_node->value;	
@@ -339,7 +318,7 @@ void expand_single_token(t_token_node *token_node)
 		handle_quote_state(*expander, &state);
 		if (*expander == '$' && state != IN_SQTS)
 		{
-			expand_dollar(token_node, &expander, &buffer[0], &i);
+			expand_dollar(token_node, &expander, &buffer[0], &i, data);
 		}
 		else
 		{
@@ -354,7 +333,7 @@ void expand_single_token(t_token_node *token_node)
 
 }
 
-void	expand_tokens(t_token_node **token_head)
+void	expand_tokens(t_token_node **token_head, t_data *data)
 {	
 	t_token_node *tmp;
 	int i = 0;
@@ -366,7 +345,7 @@ void	expand_tokens(t_token_node **token_head)
 			tmp = tmp->next;
 		if (strchr(tmp->value, '$'))
 		{
-			expand_single_token(tmp);
+			expand_single_token(tmp, data);
 		}
 		tmp = tmp->next;
 	}
@@ -410,6 +389,8 @@ void	purge_quotes(t_token_node **token_head)
 	}
 }
 
+
+
 int main(int argc, char *argv[], char **envp)
 {
 	char *prompt = "minishell$ ";
@@ -428,7 +409,7 @@ int main(int argc, char *argv[], char **envp)
 			break;
 	
 		ft_tokenizer(data->line, &data->token_head);
-		expand_tokens(&data->token_head);
+		expand_tokens(&data->token_head, data);
 		purge_quotes(&data->token_head);
 		t_token_node *tmp = data->token_head;
 		while (tmp)

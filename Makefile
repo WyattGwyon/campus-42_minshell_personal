@@ -6,7 +6,7 @@
 #    By: clouden <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/17 14:56:26 by clouden           #+#    #+#              #
-#    Updated: 2025/10/21 17:49:59 by clouden          ###   ########.fr        #
+#    Updated: 2025/10/22 17:53:39 by clouden          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -23,8 +23,8 @@ CFLAGS	=	-lreadline -g3 -Iincludes #-fsanitize=address  #-Wall -Wextra -Werror
 NAME	=	minishell
 
 SRCS	=	init.c \
-			clean.c
-
+			clean.c \
+			env_ops.c	
 
 OBJS	=	$(SRCS:%.c=%.o)
 

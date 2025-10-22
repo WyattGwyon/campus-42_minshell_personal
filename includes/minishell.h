@@ -6,12 +6,16 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/21 17:46:49 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/22 18:18:32 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 
 #include <string.h>	
+#include <stdio.h>
+#include <stddef.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 #include <stdlib.h>
 
 typedef enum e_token_type
@@ -41,10 +45,12 @@ typedef struct s_env_node
 typedef struct s_cmd_node
 {
 	char	**argv;
+	int		*heredoc;
 	char 	**infile;
 	char 	**outfiles;
+	int		*write_modes;
 	char	*cmd_path;
-	
+	struct s_cmd_node	*next;	
 } t_cmd_node;
 
 typedef	struct s_data
@@ -53,6 +59,7 @@ typedef	struct s_data
 	char 			*prompt;
 	t_token_node	*token_head;	
 	t_env_node		*env_head;
+	t_cmd_node		*cmd_head;
 
 } t_data;
 
@@ -63,9 +70,11 @@ typedef enum e_token_states
 	IN_SQTS
 } t_token_states;
 
-void init_data(t_data *data, char **envp);
+void 	init_data(t_data *data, char **envp);
 void	copy_envp(t_env_node **env_node, char **envp);
 void	append_env(t_env_node **env_head, char *name, char *value);
 void	free_tklst(t_token_node **token_head);
-void free_envlst(t_env_node **env_head);
+void	free_envlst(t_env_node **env_head);
 void	clean_all(t_data *data);
+t_env_node *get_env_node(t_env_node *env_head, char *name);
+
