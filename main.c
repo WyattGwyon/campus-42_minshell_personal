@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/22 18:18:46 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/23 19:07:08 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -404,7 +404,7 @@ int main(int argc, char *argv[], char **envp)
 	init_data(data, envp);
 	while (1)
 	{	
-		data->line = readline(data->prompt);	
+		data->line = readline(data->prompt);
 		if (!data->line || strcmp(data->line, "exit") == 0)
 			break;
 	

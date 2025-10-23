@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/22 18:18:32 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/23 19:08:39 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,12 +21,22 @@
 typedef enum e_token_type
 {
 	WORD_TK,
-	PIPE_TK,
 	IN_REDIR_TK,
 	HERE_DOC_TK,
 	OUT_REDIR_TR_TK,
 	OUT_REDIR_AP_TK,
+	PIPE_TK,
 } t_token_type;
+
+typedef enum e_auto_state
+{
+	START,
+	WORD,
+	FILEN,
+	REDIR,
+	ERROR,
+	EXIT,
+} t_auto_state;
 
 typedef struct s_token_node
 {
@@ -50,6 +60,7 @@ typedef struct s_cmd_node
 	char 	**outfiles;
 	int		*write_modes;
 	char	*cmd_path;
+	int		prev_token;
 	struct s_cmd_node	*next;	
 } t_cmd_node;
 
