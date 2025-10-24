@@ -6,7 +6,7 @@
 #    By: clouden <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/17 14:56:26 by clouden           #+#    #+#              #
-#    Updated: 2025/10/22 17:53:39 by clouden          ###   ########.fr        #
+#    Updated: 2025/10/24 21:54:41 by clouden          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -18,13 +18,14 @@ YELLOW  =	\033[1;33m
 BLUE    =	\033[0;34m
 
 CC		=	cc
-CFLAGS	=	-lreadline -g3 -Iincludes #-fsanitize=address  #-Wall -Wextra -Werror
+CFLAGS	=	-lreadline -g3 -Iincludes  #-fsanitize=address  #-Wall -Wextra -Werror
 
 NAME	=	minishell
 
 SRCS	=	init.c \
 			clean.c \
-			env_ops.c	
+			env_ops.c \
+			automata.c
 
 OBJS	=	$(SRCS:%.c=%.o)
 

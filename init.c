@@ -47,6 +47,8 @@ void	copy_envp(t_env_node **env_node, char **envp)
 	{
 		tmpname = strtok(*envp, "=");
 		tmpval = strtok(NULL, " ");
+		if (!tmpval)
+			tmpval = "";
 		append_env(env_node, tmpname, tmpval);
 		envp++;		
 	}

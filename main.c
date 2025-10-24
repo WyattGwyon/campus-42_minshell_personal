@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/23 19:07:08 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/24 22:09:51 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,6 +137,43 @@ int	ft_isshelloperator(char c)
 {
 	return (c == '|' || c == '<' || c == '>');
 }
+
+void shift_token(t_token_node **token_head)
+{
+	t_token_node *temp;
+	t_token_node *temp2;
+	
+	if (!(*token_head)->next)
+	{
+		free_tklst(token_head);
+		*token_head = NULL;
+		return ;
+	}
+	temp = (*token_head)->next;
+	temp2 = *token_head;
+	*token_head = temp;
+	if (temp2->value)
+		free(temp2->value);
+	free(temp2);
+}
+
+void append_cmd(t_data *data)
+{
+	t_cmd_node *temp;
+	
+	if (!data->cmd_head)
+	{
+		data->cmd_head = data->new_cmd;
+		return ;
+	}
+	temp = data->cmd_head;
+	while (temp->next)
+	{
+		temp = temp->next;
+	}
+	temp->next = data->new_cmd;
+}
+
 
 void	append_token(t_token_node **head, char *value, t_token_type type)
 {
@@ -417,7 +454,9 @@ int main(int argc, char *argv[], char **envp)
 			printf("%s\n", tmp->value);
 			tmp = tmp->next;
 		}
+		automata(data);
 		free_tklst(&data->token_head);
+		free_cmdlst(&data->cmd_head);
 		// for (t_token_node *tmp = data->token_head; tmp;)
 		// {
 		// 	free(tmp->value);

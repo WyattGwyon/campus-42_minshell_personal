@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 17:09:30 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/22 18:07:07 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/24 22:19:48 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,8 @@ void	free_arr(char ***arr)
 	{
 		while ((*arr)[i])
 		{
-			free((*arr)[i]);
+			if ((*arr)[i])
+				free((*arr)[i]);
 			i++;
 		}
 		free(*arr);
@@ -80,26 +81,26 @@ void	free_single_cmd(t_cmd_node **cmd)
 	int i = 0;
 	free_arr(&(*cmd)->argv);
 	free_arr(&(*cmd)->infile);
-	free_arr(&(*cmd)->outfiles);
+	free_arr(&(*cmd)->outfile);
 	if ((*cmd)->heredoc)
 		free((*cmd)->heredoc);
 	if ((*cmd)->write_modes)
 		free((*cmd)->write_modes);
 	if ((*cmd)->cmd_path)
 		free((*cmd)->cmd_path);
+	free(*cmd);
+	*cmd = NULL;
 }	
 
 void free_cmdlst(t_cmd_node **cmd_head)
 {
 	t_cmd_node *tmp;
-	t_cmd_node *tmp2;
-
-	tmp = *cmd_head;
-	while (tmp)
+	
+	while (*cmd_head)
 	{
-		tmp2 = tmp;
-		tmp = tmp->next;
-		free_single_cmd(&tmp2);
+		tmp = (*cmd_head)->next;
+		free_single_cmd(cmd_head);
+		*cmd_head = tmp;
 	}
 	*cmd_head = NULL;
 }

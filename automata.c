@@ -6,13 +6,13 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/22 19:03:07 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/23 19:06:24 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/24 22:00:01 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <minishell.h>
 
-int	arr_len(char *arr)
+int	arr_len(char **arr)
 {
 	int	i = 0;
 	
@@ -25,83 +25,189 @@ int	arr_len(char *arr)
 	return (i);
 }
 
-void	word(t_data *data, t_cmd_node **cmd)
+void *safe_calloc(t_data *data, size_t size, size_t sizeoftp)
 {
-	int	len;
-	char **temp;
-
-	if (!(*cmd)->argv)
+	void *ptr;
+	
+	ptr = calloc(size, sizeoftp);
+	if (!ptr)
 	{
-		(*cmd)->argv = calloc(1 + 1, sizeof(char *));
-		(*cmd)->argv[0] = strdup(data->token_head->value);
+		clean_all(data);
+		exit(1);
+	}
+	return (ptr);
+}
+
+void *safe_realloc(t_data *data, void *arr, size_t size)
+{
+	void *ptr;
+
+	ptr = realloc(arr, size);
+	if (!ptr)
+	{
+		clean_all(data);
+		exit(1);
+	}
+	return (ptr);
+}
+
+void	handle_arg(t_data *data, t_cmd_node *cmd)
+{
+	int		len;
+	char	**temp;
+
+	if (!cmd->argv)
+	{
+		cmd->argv = safe_calloc(data,1 + 1, sizeof(char *));
+		cmd->argv[0] = strdup(data->token_head->value);
 	}	
 	else
 	{
-		len = arr_len((*cmd)->argv);
-		temp = realloc((*cmd)->argv, len + 1 + 1);
-		if (!temp)
-		{
-			clean_all(data);
-			free_single_cmd((*cmd));
-			exit(1);
-		}
-		else
-		{
-			(*cmd)->argv[len] = temp;
-			(*cmd)->argv[len] = strdup(data->token_head->value);
-		}
+		len = arr_len(cmd->argv);
+		cmd->argv = safe_realloc(data, cmd->argv, (len + 1 + 1) * sizeof(char *));
+		cmd->argv[len] = strdup(data->token_head->value);
+		cmd->argv[len + 1] = NULL;
 	}
-	(*cmd)->prev_token = WORD;
+	cmd->prev_token = WORD_TK;
 }
 
-void	handle_infile_redir(t_data *data, t_cmd_node **cmd)
+void	handle_infile(t_data *data, t_cmd_node *cmd, int hd)
 {
+	int		len;
+	char 	**temp_arr; // char *infile[];
 	if (!cmd->infile)
 	{
-		set first infile
-	}		
-}
-
-void	file(t_data *data, t_cmd_node **cmd)
-{
-	if ((*cmd)->prev_token == IN_REDIR_TK || (*cmd)->prev_token == HERE_DOC_TK)
+		cmd->infile = safe_calloc(data,1 + 1, sizeof(char *));
+		cmd->heredoc = safe_calloc(data,1 + 1,sizeof(int));
+		cmd->infile[0] = strdup(data->token_head->value);
+		cmd->heredoc[0] = hd;
+	}
+	else
 	{
-		handle_infile_redir(
+		len = arr_len(cmd->infile);
+		cmd->infile = safe_realloc(data,cmd->infile, (len + 1 + 1) * sizeof(char *));
+		cmd->heredoc = safe_realloc(data, cmd->heredoc, (len + 1 + 1) * sizeof(char *));
+		cmd->infile[len] = strdup(data->token_head->value);
+		cmd->infile[len + 1] = NULL;
+		cmd->heredoc[len] = hd;
+		cmd->heredoc[len + 1] = -1;
+
 	}
 }
 
-void	redir(t_data *data, t_cmd_node **cmd)
+	
+void	handle_outfile(t_data *data, t_cmd_node *cmd, int wm)
 {
-	(*cmd)->prev_token = data->token_head->type;
+	int		len;
+	char 	**temp_arr; // char *infile[];
+	if (!cmd->outfile)
+	{
+		cmd->outfile = safe_calloc(data,1 + 1, sizeof(char *));
+		cmd->write_modes = safe_calloc(data,1 + 1,sizeof(int));
+		cmd->outfile[0] = strdup(data->token_head->value);
+		cmd->write_modes[0] = wm;
+	}
+	else
+	{
+		len = arr_len(cmd->outfile);
+		cmd->outfile = safe_realloc(data,cmd->outfile, (len + 1 + 1) * sizeof(char *));
+		cmd->write_modes = safe_realloc(data, cmd->write_modes, (len + 1 + 1) * sizeof(char *));
+		cmd->outfile[len] = strdup(data->token_head->value);
+		cmd->outfile[len + 1] = NULL;
+		cmd->write_modes[len] = wm;
+		cmd->write_modes[len + 1] = -1;
+
+	}
+}
+
+void	handle_file(t_data *data, t_cmd_node *cmd)
+{
+	if (cmd->prev_token == IN_REDIR_TK || cmd->prev_token == HERE_DOC_TK)
+	{
+		if (cmd->prev_token == IN_REDIR_TK)
+			handle_infile(data, cmd, 0);
+		else 
+			handle_infile(data, cmd, 1);
+	}
+	else
+	{
+		if (cmd->prev_token == OUT_REDIR_TR_TK)
+			handle_outfile(data, cmd, O_TRUNC | O_CREAT | O_WRONLY);
+		else
+			handle_outfile(data,cmd, O_APPEND | O_CREAT | O_WRONLY);
+	}
+	cmd->prev_token = WORD_TK;
+}
+
+void	handle_redir(t_data *data, t_cmd_node *cmd)
+{
+	cmd->prev_token = data->token_head->type;
 }
 
 
-void	pipe(t_data *data, t_cmd_node *cmd)
+void	handle_error(t_data *data, t_cmd_node *cmd)
 {
-	
+	dprintf(2, "syntax error\n");
 }
 
 void load_state_function(void (*state_function[])(t_data *, t_cmd_node *))
 {
 	state_function[START] = NULL;
-	state_function[WORD] = word;
-	state_function[FILENO] = file;
-	state_function[REDIR] = redir;
-	state_function[ERROR] = error;
+	state_function[WORD] = handle_arg;
+	state_function[FILENM] = handle_file;
+	state_function[REDIR] = handle_redir;
+	state_function[ERROR] = handle_error;
 	state_function[EXIT] = NULL;
 }
 
-int get_next_state(int current_state, int token)
+void	get_next_state(int *current_state, int token)
 {
 	const int state[6][6] = {
-		{1, 3, 3, 3, 3, 4},
-		{1, 3, 3, 3, 3, 5},
+		{1, 3, 3, 3, 3, 4}, //START
+		{1, 3, 3, 3, 3, 5}, //WORD
 		{1, 3, 3, 3, 3, 5},
 		{2, 4, 4, 4, 4, 4},
 		{4, 4, 4, 4, 4, 4},
 		{5, 5, 5, 5, 5, 5},
 	};
+	*current_state = state[*current_state][token];	
 }
 
+void	automata(t_data *data)
+{
+	void (*state_function[6])(t_data *, t_cmd_node *);
+	int current_state;
 
+	load_state_function(state_function);
+	while (data->token_head)
+	{
+		data->new_cmd = safe_calloc(data, 1, sizeof(t_cmd_node));
+		current_state = START;
+		while (data->token_head && current_state < ERROR)
+		{
+			get_next_state(&current_state, data->token_head->type);
+			if (current_state == EXIT)
+			{
+				shift_token(&data->token_head);
+				break;
+			}
+			if (state_function[current_state] != NULL)
+			{
+				state_function[current_state](data, data->new_cmd);
+			}
+			if (current_state == ERROR)
+			{
+				free_tklst(&data->token_head);
+				free_single_cmd(&data->new_cmd);
+				free_cmdlst(&data->cmd_head);
+				break;
+			}
+			shift_token(&data->token_head);
+		}
+		if (current_state == ERROR)
+			break ;
+		append_cmd(data);
+		data->new_cmd = NULL;
+	}
+}
 

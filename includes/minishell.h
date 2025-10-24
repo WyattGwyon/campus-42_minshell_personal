@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/23 19:08:39 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/24 21:18:04 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 typedef enum e_token_type
 {
@@ -32,7 +34,7 @@ typedef enum e_auto_state
 {
 	START,
 	WORD,
-	FILEN,
+	FILENM,
 	REDIR,
 	ERROR,
 	EXIT,
@@ -57,7 +59,7 @@ typedef struct s_cmd_node
 	char	**argv;
 	int		*heredoc;
 	char 	**infile;
-	char 	**outfiles;
+	char 	**outfile;
 	int		*write_modes;
 	char	*cmd_path;
 	int		prev_token;
@@ -68,10 +70,10 @@ typedef	struct s_data
 {
 	char 			*line;
 	char 			*prompt;
-	t_token_node	*token_head;	
+	t_token_node	*token_head;
 	t_env_node		*env_head;
 	t_cmd_node		*cmd_head;
-
+	t_cmd_node		*new_cmd; 
 } t_data;
 
 typedef enum e_token_states
@@ -88,4 +90,8 @@ void	free_tklst(t_token_node **token_head);
 void	free_envlst(t_env_node **env_head);
 void	clean_all(t_data *data);
 t_env_node *get_env_node(t_env_node *env_head, char *name);
-
+void	free_single_cmd(t_cmd_node **cmd);
+void free_cmdlst(t_cmd_node **cmd_head);
+void shift_token(t_token_node **token_head);
+void append_cmd(t_data *data);
+void	automata(t_data *data);
