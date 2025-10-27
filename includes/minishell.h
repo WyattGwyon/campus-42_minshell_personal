@@ -6,10 +6,13 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/24 21:18:04 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/27 20:46:18 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+
+#ifndef MINISHELL_H
+# define MINISHELL_H
 
 #include <string.h>	
 #include <stdio.h>
@@ -19,6 +22,10 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <libft.h>
+
+# define W 0
+# define R 1
 
 typedef enum e_token_type
 {
@@ -54,17 +61,40 @@ typedef struct s_env_node
 	struct s_env_node *next;
 } t_env_node;
 
+typedef enum e_builtin_type
+{
+	PWD,
+	ECHO,
+	CD,
+	EXPORT,
+	UNSET,
+	EXIT_BUILTIN,
+	ENV,
+	NULL_CMD,
+	NO_BUILTIN,
+} t_builtin_type;
+
 typedef struct s_cmd_node
 {
-	char	**argv;
-	int		*heredoc;
-	char 	**infile;
-	char 	**outfile;
-	int		*write_modes;
-	char	*cmd_path;
-	int		prev_token;
+	char				**argv;
+	int					*heredoc;
+	char 				**infile;
+	char 				**outfile;
+	int					*write_modes;
+	char				*cmd_path;
+	int					prev_token;
+	t_builtin_type		builtin_type;
 	struct s_cmd_node	*next;	
 } t_cmd_node;
+
+typedef struct s_exec_data
+{
+	int pipe_fd[2];
+	int prev_fd;
+	int *infile_fds;
+	int *outfile_fds;
+	int cmd_cnt;
+} t_exec_data;
 
 typedef	struct s_data
 {
@@ -73,7 +103,9 @@ typedef	struct s_data
 	t_token_node	*token_head;
 	t_env_node		*env_head;
 	t_cmd_node		*cmd_head;
-	t_cmd_node		*new_cmd; 
+	t_cmd_node		*new_cmd;
+	int 			last_exit_code;
+	char			*cwd;
 } t_data;
 
 typedef enum e_token_states
@@ -82,6 +114,7 @@ typedef enum e_token_states
 	IN_DQTS,
 	IN_SQTS
 } t_token_states;
+
 
 void 	init_data(t_data *data, char **envp);
 void	copy_envp(t_env_node **env_node, char **envp);
@@ -95,3 +128,12 @@ void free_cmdlst(t_cmd_node **cmd_head);
 void shift_token(t_token_node **token_head);
 void append_cmd(t_data *data);
 void	automata(t_data *data);
+size_t	ft_strlcat(char *dst, const char *src, size_t size);
+char	*ft_itoa(int n);
+int	ft_isshelloperator(char c);
+void	handle_redir_token(char **str, t_token_node **head);
+void	append_token(t_token_node **head, char *value, t_token_type type);
+int print_working_dir(t_data *data, char ** argv);
+int exit_builtin(t_data *data, char **argv);
+void executor(t_data *data);
+#endif

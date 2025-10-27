@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 17:09:30 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/24 22:19:48 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/27 18:37:37 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,6 +109,8 @@ void	clean_all(t_data *data)
 {
 	if (data->line)
 		free(data->line);
+	if (data->cwd)
+		free(data->cwd);
 	free_tklst(&data->token_head);
 	free_envlst(&data->env_head);
 	free_cmdlst(&data->cmd_head);

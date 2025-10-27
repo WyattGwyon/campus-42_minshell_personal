@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/22 19:03:07 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/24 22:00:01 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/27 20:48:08 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,7 @@ void *safe_calloc(t_data *data, size_t size, size_t sizeoftp)
 {
 	void *ptr;
 	
-	ptr = calloc(size, sizeoftp);
+	ptr = ft_calloc(size, sizeoftp);
 	if (!ptr)
 	{
 		clean_all(data);
@@ -59,13 +59,13 @@ void	handle_arg(t_data *data, t_cmd_node *cmd)
 	if (!cmd->argv)
 	{
 		cmd->argv = safe_calloc(data,1 + 1, sizeof(char *));
-		cmd->argv[0] = strdup(data->token_head->value);
+		cmd->argv[0] = ft_strdup(data->token_head->value);
 	}	
 	else
 	{
 		len = arr_len(cmd->argv);
 		cmd->argv = safe_realloc(data, cmd->argv, (len + 1 + 1) * sizeof(char *));
-		cmd->argv[len] = strdup(data->token_head->value);
+		cmd->argv[len] = ft_strdup(data->token_head->value);
 		cmd->argv[len + 1] = NULL;
 	}
 	cmd->prev_token = WORD_TK;
@@ -79,7 +79,7 @@ void	handle_infile(t_data *data, t_cmd_node *cmd, int hd)
 	{
 		cmd->infile = safe_calloc(data,1 + 1, sizeof(char *));
 		cmd->heredoc = safe_calloc(data,1 + 1,sizeof(int));
-		cmd->infile[0] = strdup(data->token_head->value);
+		cmd->infile[0] = ft_strdup(data->token_head->value);
 		cmd->heredoc[0] = hd;
 	}
 	else
@@ -87,7 +87,7 @@ void	handle_infile(t_data *data, t_cmd_node *cmd, int hd)
 		len = arr_len(cmd->infile);
 		cmd->infile = safe_realloc(data,cmd->infile, (len + 1 + 1) * sizeof(char *));
 		cmd->heredoc = safe_realloc(data, cmd->heredoc, (len + 1 + 1) * sizeof(char *));
-		cmd->infile[len] = strdup(data->token_head->value);
+		cmd->infile[len] = ft_strdup(data->token_head->value);
 		cmd->infile[len + 1] = NULL;
 		cmd->heredoc[len] = hd;
 		cmd->heredoc[len + 1] = -1;
@@ -104,7 +104,7 @@ void	handle_outfile(t_data *data, t_cmd_node *cmd, int wm)
 	{
 		cmd->outfile = safe_calloc(data,1 + 1, sizeof(char *));
 		cmd->write_modes = safe_calloc(data,1 + 1,sizeof(int));
-		cmd->outfile[0] = strdup(data->token_head->value);
+		cmd->outfile[0] = ft_strdup(data->token_head->value);
 		cmd->write_modes[0] = wm;
 	}
 	else
@@ -112,7 +112,7 @@ void	handle_outfile(t_data *data, t_cmd_node *cmd, int wm)
 		len = arr_len(cmd->outfile);
 		cmd->outfile = safe_realloc(data,cmd->outfile, (len + 1 + 1) * sizeof(char *));
 		cmd->write_modes = safe_realloc(data, cmd->write_modes, (len + 1 + 1) * sizeof(char *));
-		cmd->outfile[len] = strdup(data->token_head->value);
+		cmd->outfile[len] = ft_strdup(data->token_head->value);
 		cmd->outfile[len + 1] = NULL;
 		cmd->write_modes[len] = wm;
 		cmd->write_modes[len + 1] = -1;
@@ -147,7 +147,13 @@ void	handle_redir(t_data *data, t_cmd_node *cmd)
 
 void	handle_error(t_data *data, t_cmd_node *cmd)
 {
-	dprintf(2, "syntax error\n");
+	ft_putendl_fd("syntax error\n", 2);
+}
+
+void handle_exit(t_data *data, t_cmd_node *cmd)
+{
+	(void)cmd;
+	shift_token(&data->token_head);
 }
 
 void load_state_function(void (*state_function[])(t_data *, t_cmd_node *))
@@ -157,7 +163,7 @@ void load_state_function(void (*state_function[])(t_data *, t_cmd_node *))
 	state_function[FILENM] = handle_file;
 	state_function[REDIR] = handle_redir;
 	state_function[ERROR] = handle_error;
-	state_function[EXIT] = NULL;
+	state_function[EXIT] = handle_exit;
 }
 
 void	get_next_state(int *current_state, int token)
@@ -173,11 +179,32 @@ void	get_next_state(int *current_state, int token)
 	*current_state = state[*current_state][token];	
 }
 
+t_builtin_type get_builtin(char **cmd)
+{
+	if (!cmd || !*cmd[0])
+		return (NULL_CMD);
+	else if (!ft_strncmp(cmd[0], "pwd", 3))
+		return (PWD);
+	else if (!ft_strncmp(cmd[0], "echo", 4))
+		return (ECHO);
+	else if (!ft_strncmp(cmd[0], "cd", 2))
+		return (CD);
+	else if (!ft_strncmp(cmd[0], "export", 6))
+		return (EXPORT);
+	else if (!ft_strncmp(cmd[0], "unset", 5))
+		return (UNSET);
+	else if (!ft_strncmp(cmd[0], "exit", 4))
+		return (EXIT_BUILTIN);
+	else if (!ft_strncmp(cmd[0], "env", 3))
+		return (ENV);
+	else
+		return (NO_BUILTIN);
+}
+
 void	automata(t_data *data)
 {
 	void (*state_function[6])(t_data *, t_cmd_node *);
 	int current_state;
-
 	load_state_function(state_function);
 	while (data->token_head)
 	{
@@ -186,15 +213,9 @@ void	automata(t_data *data)
 		while (data->token_head && current_state < ERROR)
 		{
 			get_next_state(&current_state, data->token_head->type);
+			state_function[current_state](data, data->new_cmd);
 			if (current_state == EXIT)
-			{
-				shift_token(&data->token_head);
 				break;
-			}
-			if (state_function[current_state] != NULL)
-			{
-				state_function[current_state](data, data->new_cmd);
-			}
 			if (current_state == ERROR)
 			{
 				free_tklst(&data->token_head);
@@ -206,6 +227,7 @@ void	automata(t_data *data)
 		}
 		if (current_state == ERROR)
 			break ;
+		data->new_cmd->builtin_type = get_builtin(data->new_cmd->argv);
 		append_cmd(data);
 		data->new_cmd = NULL;
 	}

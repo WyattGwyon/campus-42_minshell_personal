@@ -20,7 +20,7 @@ t_env_node *get_env_node(t_env_node *env_head, char *name)
 			i++;
 	while (env_head)
 	{
-		if (strncmp(env_head->name, name, i) == 0)	
+		if (ft_strncmp(env_head->name, name, i) == 0)	
 		{
 			return (env_head);
 		}

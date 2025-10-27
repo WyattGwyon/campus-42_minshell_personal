@@ -6,156 +6,12 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/24 22:09:51 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/27 20:05:32 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <minishell.h>
 
-int ft_strlen(char *s)
-{
-	int i = 0;
-
-	while (s[i])
-		i++;
-	return (i);
-}
-
-size_t	ft_strlcat(char *dst, const char *src, size_t size)
-{
-	size_t	i;
-	size_t	d_len;
-
-	i = 0;
-	d_len = ft_strlen(dst);
-	if (size == 0 || (size == 1 && dst[0] == '\0'))
-	{
-		return (ft_strlen((char *)src));
-	}
-	else if ((size == 1 && dst[0] != '\0') || \
-			(size > 1 && d_len > size - 1))
-	{
-		return (size + ft_strlen((char *)src));
-	}
-	else if (size > 1 && d_len == size - 1)
-		return (d_len + ft_strlen((char *)src));
-	while (src[i] && d_len + i < size - 1)
-	{
-		dst[d_len + i] = src[i];
-		i++;
-	}
-	dst[d_len + i] = '\0';
-	return (d_len + ft_strlen((char *)src));
-}
-
-
-static int	ft_getsize(long n, int neg)
-{
-	int	size;
-
-	size = 2;
-	if (neg == 1)
-		size++;
-	while (n >= 10)
-	{
-		size++;
-		n = n / 10;
-	}
-	return (size);
-}
-
-static char	*ft_ifzero(char *str)
-{
-	int	size;
-
-	size = 2;
-	str = calloc(1, size);
-	if (!str)
-		return (NULL);
-	str[0] = '0';
-	str[1] = '\0';
-	return (str);
-}
-
-static char	*ft_buildstr(long n, char *str, int size)
-{
-	str = calloc(1, size);
-	if (!str)
-		return (NULL);
-	size--;
-	str[size] = '\0';
-	while (n >= 0)
-	{
-		if (n == 0 && size == 0)
-			return (str);
-		else if (n == 0 && size == 1)
-		{
-			size--;
-			str[size] = '-';
-			return (str);
-		}
-		else
-		{
-			size--;
-			str[size] = (n % 10) + '0';
-			n /= 10;
-		}
-	}
-	return (str);
-}
-
-char	*ft_itoa(int n)
-{
-	char	*str;
-	int		size;
-	long	num;
-
-	str = NULL;
-	num = n;
-	if (num == 0)
-	{
-		str = ft_ifzero(str);
-		if (str == NULL)
-			return (NULL);
-		return (str);
-	}
-	if (num < 0)
-	{
-		num = num * -1;
-		size = ft_getsize(num, 1);
-	}
-	else
-		size = ft_getsize(num, 0);
-	str = ft_buildstr(num, str, size);
-	if (str == NULL)
-		return (NULL);
-	return (str);
-}
-
-	
-int	ft_isshelloperator(char c)
-{
-	return (c == '|' || c == '<' || c == '>');
-}
-
-void shift_token(t_token_node **token_head)
-{
-	t_token_node *temp;
-	t_token_node *temp2;
-	
-	if (!(*token_head)->next)
-	{
-		free_tklst(token_head);
-		*token_head = NULL;
-		return ;
-	}
-	temp = (*token_head)->next;
-	temp2 = *token_head;
-	*token_head = temp;
-	if (temp2->value)
-		free(temp2->value);
-	free(temp2);
-}
 
 void append_cmd(t_data *data)
 {
@@ -175,66 +31,7 @@ void append_cmd(t_data *data)
 }
 
 
-void	append_token(t_token_node **head, char *value, t_token_type type)
-{
-	t_token_node	*new_node;
-	t_token_node	*temp;
-	
-	new_node = calloc(1, sizeof(t_token_node));
-	new_node->value = strdup(value);
-	new_node->type = type;
-	if (!*head)
-	{
-		*head = new_node; 
-	}
-	else
-	{
-		temp = *head;
-		while (temp->next)
-			temp = temp->next;
-		temp->next = new_node;
-	}
-}
 
-void	handle_redir_token(char **str, t_token_node **head)
-{
-	static	t_token_node tokens[] =
-	{
-		{">>", OUT_REDIR_AP_TK, NULL},
-		{">", OUT_REDIR_AP_TK, NULL},
-		{"<<", HERE_DOC_TK, NULL},
-		{"<", IN_REDIR_TK, NULL},
-	};
-	int 	state = 0;
-	
-	if (**str == '>')
-	{
-		if (*((*str) + 1) == '>')
-		{
-			state = 0;
-			(*str) += 2;
-		}
-		else 
-		{
-			state = 1;
-			(*str)++;
-		}
-	}
-	else if (**str == '<')
-	{
-		if (*((*str) + 1) == '<')
-		{	
-			state = 2;
-			(*str) += 2;
-		}
-		else 
-		{
-			state = 3;	
-			(*str)++;
-		}
-	}	
-	append_token(head, tokens[state].value, tokens[state].type);
-}
 void	handle_quote_state(char c, t_token_states *state)
 {
 	if (c == '"' )
@@ -276,7 +73,7 @@ void ft_tokenize_words(char **str, t_token_node **token_head)
 	{
 		printf("syntax error\n");
 	}
-	else if (buffer[0] && state == NORMAL)
+	else if (state == NORMAL)
 	{	
 		append_token(token_head, buffer, WORD_TK);
 	}
@@ -365,7 +162,7 @@ void expand_single_token(t_token_node *token_node, t_data *data)
 		}
 	}	
 	free(token_node->value);
-	token_node->value = strdup(buffer);
+	token_node->value = ft_strdup(buffer);
 	return ;
 
 }
@@ -380,7 +177,7 @@ void	expand_tokens(t_token_node **token_head, t_data *data)
 	{
 		if (tmp->type != WORD_TK)
 			tmp = tmp->next;
-		if (strchr(tmp->value, '$'))
+		if (ft_strchr(tmp->value, '$'))
 		{
 			expand_single_token(tmp, data);
 		}
@@ -392,7 +189,7 @@ void resolve_quotes(t_token_node *token_node)
 {
 	int i = 0;
 	int b = 0;
-	char buffer [1024];
+	char buffer [1024] = {0};
 
 	while (token_node->value[i])
 	{
@@ -406,7 +203,7 @@ void resolve_quotes(t_token_node *token_node)
 		}
 	}
 	free(token_node->value);
-	token_node->value = strdup(buffer);
+	token_node->value = ft_strdup(buffer);
 }
 
 void	purge_quotes(t_token_node **token_head)
@@ -418,7 +215,7 @@ void	purge_quotes(t_token_node **token_head)
 	while (tmp)
 	{
 		if (tmp->type == WORD_TK
-			&& (strchr(tmp->value, '\'') || strchr(tmp->value, '"')))
+			&& (ft_strchr(tmp->value, '\'') || ft_strchr(tmp->value, '"')))
 		{
 			resolve_quotes(tmp);
 		}
@@ -433,7 +230,7 @@ int main(int argc, char *argv[], char **envp)
 	char *prompt = "minishell$ ";
 	char 			*line;
 	t_token_node	*token_head = NULL;
-	t_data 			*data = calloc(1, sizeof(t_data));
+	t_data 			*data = ft_calloc(1, sizeof(t_data));
 	
 
 	if (argc > 1 && argv[1])
@@ -442,19 +239,15 @@ int main(int argc, char *argv[], char **envp)
 	while (1)
 	{	
 		data->line = readline(data->prompt);
-		if (!data->line || strcmp(data->line, "exit") == 0)
+		if (!data->line)
 			break;
 	
 		ft_tokenizer(data->line, &data->token_head);
 		expand_tokens(&data->token_head, data);
 		purge_quotes(&data->token_head);
 		t_token_node *tmp = data->token_head;
-		while (tmp)
-		{
-			printf("%s\n", tmp->value);
-			tmp = tmp->next;
-		}
 		automata(data);
+		executor(data);
 		free_tklst(&data->token_head);
 		free_cmdlst(&data->cmd_head);
 		// for (t_token_node *tmp = data->token_head; tmp;)

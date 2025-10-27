@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 13:11:27 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/21 17:47:16 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/27 18:37:41 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@ void	append_env(t_env_node **env_head, char *name, char *value)
 	t_env_node *new_node;
 	t_env_node *temp;
 
-	new_node = calloc(1, sizeof(t_env_node));
-	new_node->name = strdup(name);
-	new_node->value = strdup(value);
+	new_node = ft_calloc(1, sizeof(t_env_node));
+	new_node->name = ft_strdup(name);
+	new_node->value = ft_strdup(value);
 	if (!*env_head)
 	{
 		*env_head = new_node;
@@ -62,6 +62,7 @@ void	init_data(t_data *data, char **envp)
 	data->token_head = NULL;
 	data->env_head = NULL;	
 	copy_envp(&data->env_head, envp);
+	data->cwd = getcwd(NULL, 0);	
 	
 }
 
