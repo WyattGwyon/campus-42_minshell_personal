@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 13:11:27 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/27 18:37:41 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/28 20:19:07 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,10 @@ void	append_env(t_env_node **env_head, char *name, char *value)
 
 	new_node = ft_calloc(1, sizeof(t_env_node));
 	new_node->name = ft_strdup(name);
-	new_node->value = ft_strdup(value);
+	if (value == NULL)
+		new_node->value = NULL;
+	else
+		new_node->value = ft_strdup(value);
 	if (!*env_head)
 	{
 		*env_head = new_node;

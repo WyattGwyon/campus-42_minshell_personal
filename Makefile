@@ -6,7 +6,7 @@
 #    By: clouden <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/17 14:56:26 by clouden           #+#    #+#              #
-#    Updated: 2025/10/27 21:28:54 by clouden          ###   ########.fr        #
+#    Updated: 2025/10/28 19:25:28 by clouden          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -20,7 +20,7 @@ BLUE    =	\033[0;34m
 MAKE	= make
 
 CC		=	cc
-CFLAGS	=	-lreadline -g3 -Iincludes -Ilibft/include #-fsanitize=address  #-Wall -Wextra -Werror
+CFLAGS	=	-lreadline -g3 -Iincludes -Ilibft/include -fsanitize=address  #-Wall -Wextra -Werror
 
 NAME	=	minishell
 
@@ -31,7 +31,8 @@ SRCS	=	init.c \
 			token_utils.c \
 			utils.c \
 			executor.c \
-			builtins.c
+			builtins.c \
+			builtin_utils.c
 
 OBJS	=	$(SRCS:%.c=%.o)
 

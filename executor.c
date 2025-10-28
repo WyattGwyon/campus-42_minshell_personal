@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 19:21:29 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/27 20:03:35 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/28 19:24:39 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,12 @@
 void load_builtin_function(int (*builtin_function[])(t_data *, char **))
 {
 	builtin_function[PWD] = print_working_dir;
-	builtin_function[ECHO] = NULL;
+	builtin_function[ECHO] = print_echo;
 	builtin_function[CD] = NULL;
-	builtin_function[EXPORT] = NULL;
-	builtin_function[UNSET] = NULL;
+	builtin_function[EXPORT] = export_builtin;
+	builtin_function[UNSET] = unset_builtin;
 	builtin_function[EXIT_BUILTIN] = exit_builtin;
+	builtin_function[ENV] = print_env;
 	builtin_function[NULL_CMD] = NULL;
 }
 

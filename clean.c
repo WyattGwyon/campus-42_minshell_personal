@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 17:09:30 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/27 18:37:37 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/28 19:52:08 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,6 +103,15 @@ void free_cmdlst(t_cmd_node **cmd_head)
 		*cmd_head = tmp;
 	}
 	*cmd_head = NULL;
+}
+
+void free_env_node(t_env_node *env_node)
+{
+	if (env_node->name)
+		free(env_node->name);
+	if (env_node->value)
+		free(env_node->value);
+	free(env_node);
 }
 
 void	clean_all(t_data *data)

@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/27 20:46:18 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/28 20:12:15 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -136,4 +136,15 @@ void	append_token(t_token_node **head, char *value, t_token_type type);
 int print_working_dir(t_data *data, char ** argv);
 int exit_builtin(t_data *data, char **argv);
 void executor(t_data *data);
+int print_env(t_data *data, char **str);
+int print_echo(t_data *data, char **argv);
+void free_env_node(t_env_node *env_node);
+void remove_env(t_data *data, t_env_node *curr, t_env_node *prev);
+int unset_env_node(t_data *data, char *name);
+int unset_builtin(t_data *data, char **str);
+int env_length(t_env_node *env_head);
+int export_builtin(t_data *data, char **str);
+void *safe_calloc(t_data *data, size_t size, size_t sizeoftp);
+void	free_arr(char ***arr);
+void *set_env_node(t_env_node **env_head, char *name , char *input_value);
 #endif
