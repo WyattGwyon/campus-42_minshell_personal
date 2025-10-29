@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 13:11:27 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/28 20:19:07 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 19:14:31 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,3 +69,22 @@ void	init_data(t_data *data, char **envp)
 	
 }
 
+
+void init_exec(t_data *data, t_exec_data *exec)
+{
+	t_env_node *temp;
+	exec->orig_stdin = dup(STDIN_FILENO);
+	exec->orig_stdout = dup(STDOUT_FILENO);
+	temp = get_env_node(data->env_head, "PATH");
+	if (!temp)
+	{
+		exec->path_arr = safe_calloc(data, 1, sizeof(char*));
+		return ;
+	}
+	exec->path_arr = ft_split(temp->value, ':');
+	if (!exec->path_arr)
+	{
+		clean_all(data);
+		exit(-1);
+	}
+}

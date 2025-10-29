@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/29 13:41:48 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/29 13:48:41 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 17:21:26 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ void ft_tokenize_words(char **str, t_token_node **token_head)
 	state = NORMAL;
 	int i = 0;
 
+	while (isspace(**str))
+		str++;
 	while (**str)
 	{
 		if (ft_isshelloperator(**str))
@@ -57,7 +59,7 @@ void ft_tokenizer(char *str, t_token_node **token_head)
 				str++;
 			}
 		}
-		else
+		else if (*str)
 		{
 			ft_tokenize_words(&str, token_head); 
 		}

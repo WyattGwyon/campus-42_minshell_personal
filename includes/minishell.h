@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/29 17:44:54 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 20:55:57 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 
 # define W 0
@@ -93,11 +94,9 @@ typedef struct s_cmd_node
 
 typedef struct s_exec_data
 {
-	int pipe_fd[2];
-	int prev_fd;
-	int *infile_fds;
-	int *outfile_fds;
-	int cmd_cnt;
+	int	orig_stdin;
+	int	orig_stdout;
+	char **path_arr;
 } t_exec_data;
 
 typedef	struct s_data
@@ -108,6 +107,7 @@ typedef	struct s_data
 	t_env_node		*env_head;
 	t_cmd_node		*cmd_head;
 	t_cmd_node		*new_cmd;
+	t_exec_data		exec;
 	int 			last_exit_code;
 	char			*cwd;
 } t_data;
@@ -154,4 +154,7 @@ void *set_env_node(t_env_node **env_head, char *name , char *input_value);
 void	handle_quote_state(char c, t_token_states *state);
 void ft_tokenizer(char *str, t_token_node **token_head);
 int cd_builtin(t_data *data, char **argv);
+void init_exec(t_data *data, t_exec_data *exec);
+void 	clean_and_exit(t_data *data, int exit_code);
+void clean_exec(t_exec_data *exec);
 #endif

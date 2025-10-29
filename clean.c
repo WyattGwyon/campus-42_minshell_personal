@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 17:09:30 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/28 19:52:08 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 20:45:47 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,8 +120,23 @@ void	clean_all(t_data *data)
 		free(data->line);
 	if (data->cwd)
 		free(data->cwd);
+	if (data->exec.path_arr)
+		free_arr(&data->exec.path_arr);
 	free_tklst(&data->token_head);
 	free_envlst(&data->env_head);
 	free_cmdlst(&data->cmd_head);
 	free(data);
+}
+
+void 	clean_and_exit(t_data *data, int exit_code)
+{
+	clean_all(data);
+	exit(exit_code);
+}
+
+void clean_exec(t_exec_data *exec)
+{
+	if (exec->path_arr)
+		free_arr(&exec->path_arr);
+	ft_bzero(exec, sizeof(t_exec_data));
 }
