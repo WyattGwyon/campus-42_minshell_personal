@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:42:59 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/29 16:44:34 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 17:56:40 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -233,7 +233,20 @@ int cd_builtin(t_data *data, char **argv)
 	}
 	else if (argv[1])
 	{
-		chdir(argv[1]);
+		if (stat(argv[1], &dir_stat) == -1)
+		{
+			if (errno == ENOENT)
+				dprintf(STDERR_FILENO, "stat: does not exist\n");
+			else
+				dprintf(STDERR_FILENO, "stat: stat failed\n");
+			return (1);
+		}
+		if (!S_ISDIR(dir_stat.st_mode))
+			dprintf(STDERR_FILENO, "stat: is not a directory\n");
+		else if ((dir_stat.st_mode & (S_IRUSR | S_IXUSR)) != (S_IRUSR | S_IXUSR))
+			dprintf(STDERR_FILENO, "stat: permission denied\n");
+		else
+			chdir(argv[1]);
 	}
 	else if (argv[2])
 		dprintf(STDERR_FILENO, "minishell: cd: too many argumantes\n");

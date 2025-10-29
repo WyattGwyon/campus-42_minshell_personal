@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/28 20:12:15 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 17:44:54 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <libft.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <errno.h>
+
 
 # define W 0
 # define R 1
@@ -147,4 +151,7 @@ int export_builtin(t_data *data, char **str);
 void *safe_calloc(t_data *data, size_t size, size_t sizeoftp);
 void	free_arr(char ***arr);
 void *set_env_node(t_env_node **env_head, char *name , char *input_value);
+void	handle_quote_state(char c, t_token_states *state);
+void ft_tokenizer(char *str, t_token_node **token_head);
+int cd_builtin(t_data *data, char **argv);
 #endif
