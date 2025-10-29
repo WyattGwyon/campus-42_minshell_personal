@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 18:42:59 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/28 20:31:08 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 16:44:34 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -215,6 +215,32 @@ int export_builtin(t_data *data, char **str)
 	}
 	return (0);
 }	
+
+int cd_builtin(t_data *data, char **argv)
+{
+	t_env_node *temp;
+	struct stat dir_stat;
+		
+	if (!argv[1])
+	{
+		temp = get_env_node(data->env_head, "HOME");
+		if (!temp)
+			dprintf(STDERR_FILENO, 	"minishell: cd: HOME not set\n");
+		else
+		{
+			chdir(temp->value);
+		}
+	}
+	else if (argv[1])
+	{
+		chdir(argv[1]);
+	}
+	else if (argv[2])
+		dprintf(STDERR_FILENO, "minishell: cd: too many argumantes\n");
+	
+	free(data->cwd);
+	data->cwd = getcwd(NULL, 0);
+}    
 
 
 

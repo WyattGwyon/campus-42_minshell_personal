@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/28 15:56:44 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 13:48:41 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,75 +32,6 @@ void append_cmd(t_data *data)
 
 
 
-void	handle_quote_state(char c, t_token_states *state)
-{
-	if (c == '"' )
-	{
-		if (*state == NORMAL)
-			*state = IN_DQTS;
-		else if (*state == IN_DQTS)
-			*state = NORMAL;
-	}
-	else if (c == '\'') 
-	{
-		if (*state == NORMAL)
-			*state = IN_SQTS;
-		else if (*state == IN_SQTS)
-			*state = NORMAL;
-	}
-}
-
-
-void ft_tokenize_words(char **str, t_token_node **token_head)
-{
-	char buffer[1024] = {0};
-	t_token_states state; 
-	state = NORMAL;
-	int i = 0;
-
-	while (**str)
-	{
-		if (ft_isshelloperator(**str))
-			break;
-		if (isspace(**str) && state == NORMAL)
-			break;
-		handle_quote_state(**str, &state);
-		buffer[i++] = **str;
-		
-		(*str)++;
-	}
-	if (buffer[0] && state != NORMAL)
-	{
-		printf("syntax error\n");
-	}
-	else if (state == NORMAL)
-	{	
-		append_token(token_head, buffer, WORD_TK);
-	}
-}
-
-void ft_tokenizer(char *str, t_token_node **token_head)
-{
-	while (*str)
-	{
-		while (isspace(*str))
-			str++;
-		if (ft_isshelloperator(*str))
-		{
-			if (*str != '|')
-				handle_redir_token(&str, token_head);
-			else
-			{
-				append_token(token_head, "|", PIPE_TK);
-				str++;
-			}
-		}
-		else
-		{
-			ft_tokenize_words(&str, token_head); 
-		}
-	}
-}
 
 void expand_dollar(t_token_node *token_node, char **expander, char *buffer, \
 			int *i, t_data *data)

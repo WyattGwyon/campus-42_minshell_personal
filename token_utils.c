@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 13:18:37 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/27 13:57:37 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/29 13:46:09 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,4 +94,22 @@ void	handle_redir_token(char **str, t_token_node **head)
 	append_token(head, tokens[state].value, tokens[state].type);
 }
 
+
+void	handle_quote_state(char c, t_token_states *state)
+{
+	if (c == '"' )
+	{
+		if (*state == NORMAL)
+			*state = IN_DQTS;
+		else if (*state == IN_DQTS)
+			*state = NORMAL;
+	}
+	else if (c == '\'') 
+	{
+		if (*state == NORMAL)
+			*state = IN_SQTS;
+		else if (*state == IN_SQTS)
+			*state = NORMAL;
+	}
+}
 
