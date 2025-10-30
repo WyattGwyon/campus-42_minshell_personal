@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 19:21:29 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/29 20:56:50 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/30 14:49:52 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,11 +50,11 @@ char *get_cmd_path(t_data *data, char *cmd_name)
 		if (access(path, X_OK) == 0)
 			return (path);
 		free(path);
+		i++;
 	}
 	return (NULL);
 }
 
-extern char **environ;
 
 void validate_and_execv(t_data *data, t_cmd_node *cmd)
 {
@@ -68,7 +68,7 @@ void validate_and_execv(t_data *data, t_cmd_node *cmd)
 			clean_and_exit(data, 126);
 		}
 	}
-	if (!execve(cmd->cmd_path, cmd->argv, environ))
+	if (!execve(cmd->cmd_path, cmd->argv, data->exec.envp))
 	{
 		dprintf(STDERR_FILENO, "%s: %s\n", cmd->argv[0], strerror(errno));
 		clean_and_exit(data, errno == EACCES ? 126 : 127);

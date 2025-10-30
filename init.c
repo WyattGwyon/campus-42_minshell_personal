@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/21 13:11:27 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/29 19:14:31 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/30 14:56:30 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,10 +58,37 @@ void	copy_envp(t_env_node **env_node, char **envp)
 	return ;
 }
 
+void init_envp(t_data *data, t_exec_data *exec)
+{
+	t_env_node *temp;
+	char *temp_name;
+
+	temp = data->env_head;
+	if (!temp)
+	{
+		exec->envp = safe_calloc(data, 1, sizeof(char *));
+	}
+	else
+	{
+		int i = env_length(data->env_head);
+		exec->envp = safe_calloc(data, i + 1, sizeof(char *));
+		i = 0;
+		while (temp)
+		{
+			temp_name = ft_strjoin(temp->name, "=");
+			exec->envp[i] = ft_strjoin(temp_name , temp->value);
+			temp = temp->next;
+			i++;
+			free(temp_name);
+		}
+	}
+}
+
+
 void	init_data(t_data *data, char **envp)
 {
 	data->line = NULL;
-	data->prompt = "minishell $";
+	data->prompt = "minishell $ ";
 	data->token_head = NULL;
 	data->env_head = NULL;	
 	copy_envp(&data->env_head, envp);
@@ -75,6 +102,7 @@ void init_exec(t_data *data, t_exec_data *exec)
 	t_env_node *temp;
 	exec->orig_stdin = dup(STDIN_FILENO);
 	exec->orig_stdout = dup(STDOUT_FILENO);
+	init_envp(data, exec);
 	temp = get_env_node(data->env_head, "PATH");
 	if (!temp)
 	{
@@ -88,3 +116,4 @@ void init_exec(t_data *data, t_exec_data *exec)
 		exit(-1);
 	}
 }
+

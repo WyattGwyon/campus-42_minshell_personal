@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/29 20:55:57 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/30 14:18:15 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,8 @@
 #include <sys/wait.h>
 
 
-# define W 0
-# define R 1
+# define R 0
+# define W 1
 
 typedef enum e_token_type
 {
@@ -96,6 +96,7 @@ typedef struct s_exec_data
 {
 	int	orig_stdin;
 	int	orig_stdout;
+	char **envp;
 	char **path_arr;
 } t_exec_data;
 
