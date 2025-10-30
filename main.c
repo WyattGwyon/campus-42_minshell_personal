@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/30 18:52:20 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/30 20:13:08 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,14 +36,13 @@ void append_cmd(t_data *data)
 void expand_dollar(t_token_node *token_node, char **expander, char *buffer, \
 			int *i, t_data *data)
 {
-	int	exit_code = 130;
 	t_env_node *env; 
 	char *number;
 
 	(*expander)++;
 	if (**expander == '?')
 	{
-		number = ft_itoa(exit_code);
+		number = ft_itoa(data->last_exit_code);
 		ft_strlcat(buffer, number, 1024);
 		free(number);
 		(*expander)++;
@@ -157,13 +156,22 @@ void	purge_quotes(t_token_node **token_head)
 void	sigint_handler(int sig)
 {
 	rl_replace_line("",0);
-	ft_putchar_fd('\n', 1);
 	rl_on_new_line();
-	rl_redisplay();
-	g_last_signal = SIGINT;	
+	rl_done = 1;
+	g_last_signal = SIGINT;
+}
+
+void sigquit_handler(int sig)
+{
+		g_last_signal = SIGQUIT;
 }
 
 volatile sig_atomic_t g_last_signal;
+
+static int event(void)
+{
+		return (0);
+}
 
 int main(int argc, char *argv[], char **envp)
 {
@@ -176,25 +184,33 @@ int main(int argc, char *argv[], char **envp)
 	if (argc > 1 && argv[1])
 		return (1);
 	init_data(data, envp);
+	rl_event_hook = event;
 	while (1)
 	{	
 		signal(SIGINT, sigint_handler);
-		signal(SIGQUIT, SIG_IGN);
+		signal(SIGQUIT, SIG_IGN );
+		data->line = readline(data->prompt);
+		if (!data->line)
+			break;	
 		if (g_last_signal == SIGINT)
 		{
+			dprintf(STDERR_FILENO, "sigint after  handler");
 			g_last_signal = 0;
 			data->last_exit_code = 130;
 		}
-		data->line = readline(data->prompt);
-		if (!data->line)
-			break;
-	
+		else if (g_last_signal == SIGQUIT)
+		{
+			dprintf(STDERR_FILENO, "sigquit after  handler");
+			g_last_signal = 0;
+			data->last_exit_code = 131;
+		}
 		ft_tokenizer(data->line, &data->token_head);
 		expand_tokens(&data->token_head, data);
 		purge_quotes(&data->token_head);
 		t_token_node *tmp = data->token_head;
 		automata(data);
 		executor(data);
+		clean_exec(&data->exec);
 		free_tklst(&data->token_head);
 		free_cmdlst(&data->cmd_head);
 		// for (t_token_node *tmp = data->token_head; tmp;)

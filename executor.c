@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 19:21:29 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/30 18:20:09 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/30 20:13:08 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,8 @@ pid_t last_cmd_logic(t_data *data, t_cmd_node *cmd, int input_fd)
 
 	if (pid == 0)
 	{
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
 		if (input_fd != STDIN_FILENO)
 		{
 			dup2(input_fd, STDIN_FILENO);
@@ -199,6 +201,8 @@ pid_t pipeline(t_data *data, t_cmd_node *cmd, int input_fd)
 	pid = fork();
 	if (pid == 0)
 	{
+		signal(SIGINT, SIG_DFL);
+		signal(SIGQUIT, SIG_DFL);
 		close(pip[R]);
 		if (input_fd != STDIN_FILENO) // checking if NOT FIRST CMD
 		{
@@ -245,14 +249,29 @@ void executor(t_data *data)
 			execute_builtin(data);
 			return ;
 		}
+		signal(SIGINT, SIG_IGN);
 		last_pid = pipeline(data, data->cmd_head, STDIN_FILENO);
 		waitpid(last_pid, &last_pid_status, 0);
-		data->last_exit_code = WEXITSTATUS(last_pid_status);
+		if (WIFSIGNALED(last_pid_status))
+		{
+			if (WTERMSIG(last_pid_status) == SIGINT)
+			{
+				data->last_exit_code = 130;
+				dprintf(STDERR_FILENO, "\n");
+			}
+			else if (WTERMSIG(last_pid_status) == SIGQUIT)
+			{
+					data->last_exit_code = 131;
+					dprintf(STDERR_FILENO, "Quit (Core dump)\n");
+			}
+		}
+		else
+			data->last_exit_code = WEXITSTATUS(last_pid_status);
+		signal(SIGINT, sigint_handler);
 		while (wait(NULL) > 0)
 			;
 	}
 	restore_fds(data->exec);
-	clean_exec(&data->exec);
 }
 
 
