@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/29 13:48:41 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/30 18:52:20 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -154,7 +154,16 @@ void	purge_quotes(t_token_node **token_head)
 	}
 }
 
+void	sigint_handler(int sig)
+{
+	rl_replace_line("",0);
+	ft_putchar_fd('\n', 1);
+	rl_on_new_line();
+	rl_redisplay();
+	g_last_signal = SIGINT;	
+}
 
+volatile sig_atomic_t g_last_signal;
 
 int main(int argc, char *argv[], char **envp)
 {
@@ -169,6 +178,13 @@ int main(int argc, char *argv[], char **envp)
 	init_data(data, envp);
 	while (1)
 	{	
+		signal(SIGINT, sigint_handler);
+		signal(SIGQUIT, SIG_IGN);
+		if (g_last_signal == SIGINT)
+		{
+			g_last_signal = 0;
+			data->last_exit_code = 130;
+		}
 		data->line = readline(data->prompt);
 		if (!data->line)
 			break;

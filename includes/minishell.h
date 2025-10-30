@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/30 14:18:15 by clouden          ###   ########.fr       */
+/*   Updated: 2025/10/30 18:45:08 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,12 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <sys/wait.h>
-
+#include <signal.h>
 
 # define R 0
 # define W 1
+
+extern volatile sig_atomic_t g_last_signal;
 
 typedef enum e_token_type
 {
@@ -158,4 +160,5 @@ int cd_builtin(t_data *data, char **argv);
 void init_exec(t_data *data, t_exec_data *exec);
 void 	clean_and_exit(t_data *data, int exit_code);
 void clean_exec(t_exec_data *exec);
+int handle_redirection(t_data *data, t_cmd_node *cmd);
 #endif
