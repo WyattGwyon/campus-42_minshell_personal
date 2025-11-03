@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/15 17:23:05 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/30 20:13:08 by clouden          ###   ########.fr       */
+/*   Updated: 2025/11/03 16:11:31 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -188,38 +188,28 @@ int main(int argc, char *argv[], char **envp)
 	while (1)
 	{	
 		signal(SIGINT, sigint_handler);
-		signal(SIGQUIT, SIG_IGN );
+		signal(SIGQUIT, sigquit_handler);
 		data->line = readline(data->prompt);
 		if (!data->line)
 			break;	
 		if (g_last_signal == SIGINT)
 		{
-			dprintf(STDERR_FILENO, "sigint after  handler");
 			g_last_signal = 0;
 			data->last_exit_code = 130;
 		}
 		else if (g_last_signal == SIGQUIT)
 		{
-			dprintf(STDERR_FILENO, "sigquit after  handler");
 			g_last_signal = 0;
 			data->last_exit_code = 131;
 		}
 		ft_tokenizer(data->line, &data->token_head);
 		expand_tokens(&data->token_head, data);
 		purge_quotes(&data->token_head);
-		t_token_node *tmp = data->token_head;
 		automata(data);
 		executor(data);
 		clean_exec(&data->exec);
 		free_tklst(&data->token_head);
 		free_cmdlst(&data->cmd_head);
-		// for (t_token_node *tmp = data->token_head; tmp;)
-		// {
-		// 	free(tmp->value);
-		// 	t_token_node *tmp2 = tmp;
-		// 	tmp = tmp->next;
-		// 	free(tmp2);
-		// }
 		free(data->line);
 	}
 	clean_all(data);
