@@ -6,7 +6,7 @@
 /*   By: clouden <marvin@42.fr>                     +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/17 14:54:43 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/30 19:22:35 by clouden          ###   ########.fr       */
+/*   Updated: 2025/11/03 20:56:13 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,44 +122,69 @@ typedef enum e_token_states
 	IN_SQTS
 } t_token_states;
 
+// init.c
+void		init_data(t_data *data, char **envp);
+void		copy_envp(t_env_node **env_node, char **envp);
+void		append_env(t_env_node **env_head, char *name, char *value);
+void		init_exec(t_data *data, t_exec_data *exec);
 
-void 	init_data(t_data *data, char **envp);
-void	copy_envp(t_env_node **env_node, char **envp);
-void	append_env(t_env_node **env_head, char *name, char *value);
-void	free_tklst(t_token_node **token_head);
-void	free_envlst(t_env_node **env_head);
-void	clean_all(t_data *data);
-t_env_node *get_env_node(t_env_node *env_head, char *name);
-void	free_single_cmd(t_cmd_node **cmd);
-void free_cmdlst(t_cmd_node **cmd_head);
-void shift_token(t_token_node **token_head);
-void append_cmd(t_data *data);
-void	automata(t_data *data);
-size_t	ft_strlcat(char *dst, const char *src, size_t size);
-char	*ft_itoa(int n);
-int	ft_isshelloperator(char c);
-void	handle_redir_token(char **str, t_token_node **head);
-void	append_token(t_token_node **head, char *value, t_token_type type);
-int print_working_dir(t_data *data, char ** argv);
-int exit_builtin(t_data *data, char **argv);
-void executor(t_data *data);
-int print_env(t_data *data, char **str);
-int print_echo(t_data *data, char **argv);
-void free_env_node(t_env_node *env_node);
-void remove_env(t_data *data, t_env_node *curr, t_env_node *prev);
-int unset_env_node(t_data *data, char *name);
-int unset_builtin(t_data *data, char **str);
-int env_length(t_env_node *env_head);
-int export_builtin(t_data *data, char **str);
-void *safe_calloc(t_data *data, size_t size, size_t sizeoftp);
-void	free_arr(char ***arr);
-void *set_env_node(t_env_node **env_head, char *name , char *input_value);
-void	handle_quote_state(char c, t_token_states *state);
-void ft_tokenizer(char *str, t_token_node **token_head);
-int cd_builtin(t_data *data, char **argv);
-void init_exec(t_data *data, t_exec_data *exec);
-void 	clean_and_exit(t_data *data, int exit_code);
-void clean_exec(t_exec_data *exec);
-int handle_redirection(t_data *data, t_cmd_node *cmd);
-void	sigint_handler(int sig);
+// clean.c
+void		free_tklst(t_token_node **token_head);
+void		free_envlst(t_env_node **env_head);
+void		clean_all(t_data *data);
+void		free_single_cmd(t_cmd_node **cmd);
+void		free_cmdlst(t_cmd_node **cmd_head);
+void		free_env_node(t_env_node *env_node);
+void		clean_and_exit(t_data *data, int exit_code);
+void		clean_exec(t_exec_data *exec);
+void		free_arr(char ***arr);
+
+// env_ops.c
+t_env_node	*get_env_node(t_env_node *env_head, char *name);
+void		remove_env(t_data *data, t_env_node *curr, t_env_node *prev);
+void		*set_env_node(t_env_node **env_head, char *name , char *input_value);
+
+// token_utils.c
+void		shift_token(t_token_node **token_head);
+void		handle_redir_token(char **str, t_token_node **head);
+void		append_token(t_token_node **head, char *value, t_token_type type);
+void		handle_quote_state(char c, t_token_states *state);
+
+// main.c
+void		append_cmd(t_data *data);
+void		sigint_handler(int sig);
+void		sigquit_handler(int sig);
+
+// automata.c
+void		automata(t_data *data);
+void		*safe_calloc(t_data *data, size_t size, size_t sizeoftp);
+
+// untils.c
+size_t		ft_strlcat(char *dst, const char *src, size_t size);
+char		*ft_itoa(int n);
+int			ft_isshelloperator(char c);
+
+// builtins.c
+int			print_working_dir(t_data *data, char ** argv);
+int			exit_builtin(t_data *data, char **argv);
+int			print_env(t_data *data, char **str);
+int			print_echo(t_data *data, char **argv);
+int			unset_env_node(t_data *data, char *name);
+int			cd_builtin(t_data *data, char **argv);
+int			unset_builtin(t_data *data, char **str);
+
+// executor.c
+void		executor(t_data *data);
+int handle_pipe_file_redir(t_data *data, t_cmd_node *cmd);
+
+// builtin_utils.c
+int			export_builtin(t_data *data, char **str);
+int			env_length(t_env_node *env_head);
+
+// tokenizer
+void		ft_tokenizer(char *str, t_token_node **token_head);
+
+// expand.c
+void		expand_tokens(t_token_node **token_head, t_data *data);
+
 #endif

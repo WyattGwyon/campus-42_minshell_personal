@@ -6,7 +6,7 @@
 #    By: clouden <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/10/17 14:56:26 by clouden           #+#    #+#              #
-#    Updated: 2025/10/29 13:51:20 by clouden          ###   ########.fr        #
+#    Updated: 2025/11/03 19:38:39 by clouden          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -33,7 +33,8 @@ SRCS	=	init.c \
 			executor.c \
 			builtins.c \
 			builtin_utils.c \
-			tokenizer.c
+			tokenizer.c \
+			expand.c
 
 OBJS	=	$(SRCS:%.c=%.o)
 

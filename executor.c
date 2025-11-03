@@ -6,7 +6,7 @@
 /*   By: clouden <clouden@student.42madrid.com      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/10/27 19:21:29 by clouden           #+#    #+#             */
-/*   Updated: 2025/10/30 20:13:08 by clouden          ###   ########.fr       */
+/*   Updated: 2025/11/03 20:11:30 by clouden          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -106,7 +106,7 @@ pid_t last_cmd_logic(t_data *data, t_cmd_node *cmd, int input_fd)
 			dup2(input_fd, STDIN_FILENO);
 			close(input_fd);
 		}
-		if (!handle_redirection(data, cmd))
+		if (!handle_pipe_file_redir(data, cmd))
 			clean_and_exit(data, 1);
 		child_cmd_logic(data, cmd);
 	}
@@ -171,7 +171,7 @@ int handle_outfile_redir(t_data *data, t_cmd_node *cmd)
 }
 
 
-int handle_redirection(t_data *data, t_cmd_node *cmd)
+int handle_pipe_file_redir(t_data *data, t_cmd_node *cmd)
 {
 	
 	if (cmd->infile)
@@ -211,7 +211,7 @@ pid_t pipeline(t_data *data, t_cmd_node *cmd, int input_fd)
 		}
 		dup2(pip[W], STDOUT_FILENO);
 		close(pip[W]);
-		if (!handle_redirection(data, cmd))
+		if (!handle_pipe_file_redir(data, cmd))
 			clean_and_exit(data, 1);
 		child_cmd_logic(data, cmd);
 	}
@@ -241,7 +241,7 @@ void executor(t_data *data)
 	{
 		if (!data->cmd_head->next && data->cmd_head->builtin_type < 7)
 		{
-			if (!handle_redirection(data, data->cmd_head))
+			if (!handle_pipe_file_redir(data, data->cmd_head))
 			{
 				free_cmdlst(&data->cmd_head);
 				return ;
